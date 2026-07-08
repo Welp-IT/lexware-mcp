@@ -85,7 +85,7 @@ server.express.get("/status", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
-server.use((req, res, next) => {
+server.use((req, _res, next) => {
   if (
     req.path === "/mcp" ||
     req.path.startsWith("/mcp/") ||
