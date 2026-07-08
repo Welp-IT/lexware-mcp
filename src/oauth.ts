@@ -123,11 +123,31 @@ export function createAccessTokenVerifier(oauth: OAuthSettings, deps: VerifierDe
   return async function verifyAccessToken(token: string): Promise<AuthInfo> {
     let payload: jose.JWTPayload;
     try {
+      const header = jose.decodeProtectedHeader(token);
+
+      console.error("[lexware-mcp] OAuth token header:", {
+        alg: header.alg,
+        kid: header.kid,
+        typ: header.typ,
+      });
+
       ({ payload } = await jose.jwtVerify(token, jwks, {
         issuer: oauth.issuer,
         ...(oauth.verifyAudience ? { audience: audiences } : {}),
       }));
-    } catch {
+
+      console.error("[lexware-mcp] OAuth token verified:", {
+        iss: payload.iss,
+        aud: payload.aud,
+        sub: payload.sub,
+        client_id: payload.client_id,
+        azp: payload.azp,
+        scope: payload.scope,
+        email: payload.email,
+        email_verified: payload.email_verified,
+      });
+    } catch (err) {
+      console.error("[lexware-mcp] OAuth jwtVerify failed:", err instanceof Error ? err.message : err);
       throw new InvalidTokenError("Invalid or expired access token");
     }
 
