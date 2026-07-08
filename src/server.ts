@@ -85,6 +85,20 @@ server.express.get("/status", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
+server.use((req, res, next) => {
+  if (
+    req.path === "/mcp" ||
+    req.path.startsWith("/mcp/") ||
+    req.path.startsWith("/.well-known/")
+  ) {
+    console.error(
+      `[debug] ${req.method} ${req.path} auth=${req.headers.authorization ? "yes" : "no"} ` +
+        `accept=${req.headers.accept ?? ""} ua=${req.headers["user-agent"] ?? ""}`,
+    );
+  }
+  next();
+});
+
 // Gate the MCP endpoint according to the configured auth mode.
 if (config.auth.mode === "oauth") {
   const oauth = config.auth;
